@@ -68,14 +68,14 @@ export default function Home() {
   // Estado del Agente Autónomo
   const [executing, setExecuting] = useState(false);
 
-  // Estado de Preferencias Laborales (Multipuesto por comas)
+  // Estado de Preferencias Laborales (Con todos los campos originales + puestos por comas)
   const [preferences, setPreferences] = useState<Preferences>({
-    puestos: "Atención al cliente, Repositor, Ventas, Desarrollador Web",
-    ubicacion: "Argentina / Remoto",
-    modalidad: "Remoto",
+    puestos: "Atención al cliente, Repositor, Ventas",
+    ubicacion: "Santa Fe, Argentina",
+    modalidad: "Presencial",
     jornada: "Jornada completa",
     salario: "",
-    keywords: "React, Node.js, JavaScript, Tailwind",
+    keywords: "Atención, Ventas, Repositor",
   });
   const [prefSaved, setPrefSaved] = useState(false);
   const [prefMessage, setPrefMessage] = useState("");
@@ -245,7 +245,7 @@ export default function Home() {
     const extractedData = {
       nombre: fileNameWithoutExt.replace(/[-_]/g, " "),
       puesto: preferences.puestos || "Profesional Tecnológico",
-      habilidades: preferences.keywords || "JavaScript, React, Node.js, Resolución de problemas",
+      habilidades: preferences.keywords || "Atención al cliente, Ventas",
       experiencia: "Experiencia detectada y almacenada en Supabase.",
     };
 
@@ -298,25 +298,14 @@ export default function Home() {
       const mockOffers: JobOffer[] = [
         {
           id: "job-1",
-          title: "Atención al Cliente / Ventas",
+          title: "Atención al Cliente",
           company: "Comercial del Centro",
           location: preferences.ubicacion || "Santa Fe",
           modality: preferences.modalidad || "Presencial",
           compatibility: 95,
-          description: `Búsqueda orientada a: ${preferences.puestos}. Buena presencia y trato cordial.`,
+          description: `Búsqueda orientada a: ${preferences.puestos}.`,
           source: "Portal Laboral",
           date: "Hoy",
-        },
-        {
-          id: "job-2",
-          title: "Repositor y Control de Stock",
-          company: "Supermercados Líder",
-          location: "Santa Fe",
-          modality: "Presencial",
-          compatibility: 88,
-          description: "Se busca personal para reposición de góndolas y atención en sucursal.",
-          source: "Bolsa de Empleo",
-          date: "Ayer",
         },
       ];
       setJobOffers(mockOffers);
@@ -462,9 +451,60 @@ export default function Home() {
                     type="text"
                     value={preferences.puestos}
                     onChange={(e) => setPreferences({ ...preferences, puestos: e.target.value })}
-                    placeholder="Ej: Atención al cliente, Repositor, Ventas, Desarrollador Web"
+                    placeholder="Ej: Atención al cliente, Repositor, Ventas..."
                     className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Ubicación / Ciudad:</label>
+                    <input
+                      type="text"
+                      value={preferences.ubicacion}
+                      onChange={(e) => setPreferences({ ...preferences, ubicacion: e.target.value })}
+                      placeholder="Ej: Santa Fe, Argentina"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Modalidad preferida:</label>
+                    <select
+                      value={preferences.modalidad}
+                      onChange={(e) => setPreferences({ ...preferences, modalidad: e.target.value })}
+                      className="w-full p-2.5 border border-slate-300 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="Presencial">Presencial</option>
+                      <option value="Remoto">Remoto</option>
+                      <option value="Híbrido">Híbrido</option>
+                      <option value="Cualquiera">Cualquiera</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Jornada:</label>
+                    <input
+                      type="text"
+                      value={preferences.jornada}
+                      onChange={(e) => setPreferences({ ...preferences, jornada: e.target.value })}
+                      placeholder="Ej: Jornada completa, Media jornada"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">Salario pretendido:</label>
+                    <input
+                      type="text"
+                      value={preferences.salario}
+                      onChange={(e) => setPreferences({ ...preferences, salario: e.target.value })}
+                      placeholder="Ej: A convenir / Monto mínimo"
+                      className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -475,6 +515,7 @@ export default function Home() {
                     type="text"
                     value={preferences.keywords}
                     onChange={(e) => setPreferences({ ...preferences, keywords: e.target.value })}
+                    placeholder="Ej: atención, ventas, repositor..."
                     className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
