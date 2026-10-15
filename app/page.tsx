@@ -337,7 +337,7 @@ export default function Home() {
               onClick={() => setActive(item.name)}
               style={{
                 display: "flex",
-                alignItem: "center",
+                alignItems: "center",
                 gap: "12px",
                 width: "100%",
                 padding: "12px 16px",
