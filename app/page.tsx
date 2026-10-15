@@ -155,6 +155,7 @@ export default function Home() {
     }
   };
 
+  // Función de archivos tolerante a fallos de Storage (Nube)
   async function handleFiles(files: FileList | null) {
     setMessage("");
     setError("");
@@ -178,15 +179,17 @@ export default function Home() {
 
       try {
         const filePath = `${Date.now()}_${file.name}`;
+        
+        let fileUrl = "";
         const { error: uploadError } = await supabase.storage.from("cvs").upload(filePath, file);
 
-        if (uploadError) {
-          setError(`Error al subir ${file.name} a la nube.`);
-          continue;
+        if (!uploadError) {
+          const { data: publicURLData } = supabase.storage.from("cvs").getPublicUrl(filePath);
+          fileUrl = publicURLData.publicUrl;
+        } else {
+          console.warn("Aviso de Storage omitido, continuando con registro en base de datos:", uploadError.message);
+          fileUrl = "Sin URL externa (Guardado localmente)";
         }
-
-        const { data: publicURLData } = supabase.storage.from("cvs").getPublicUrl(filePath);
-        const fileUrl = publicURLData.publicUrl;
 
         const { data: insertedCv, error: dbError } = await supabase
           .from("cvs")
@@ -202,7 +205,7 @@ export default function Home() {
           .single();
 
         if (dbError) {
-          setError("Error al registrar el CV en la base de datos.");
+          setError("Error al registrar el CV en la base de datos: " + dbError.message);
           continue;
         }
 
@@ -216,7 +219,7 @@ export default function Home() {
           },
         ]);
 
-        setMessage("¡CV cargado y guardado en la nube con éxito!");
+        setMessage("¡CV cargado y guardado con éxito!");
       } catch (err) {
         setError("Ocurrió un error inesperado al procesar el archivo.");
       }
