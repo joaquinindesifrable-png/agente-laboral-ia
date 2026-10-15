@@ -68,9 +68,9 @@ export default function Home() {
   // Estado del Agente Autónomo
   const [executing, setExecuting] = useState(false);
 
-  // Estado de Preferencias Laborales
+  // Estado de Preferencias Laborales (Multipuesto por comas)
   const [preferences, setPreferences] = useState<Preferences>({
-    puestos: "Desarrollador Web",
+    puestos: "Atención al cliente, Repositor, Ventas, Desarrollador Web",
     ubicacion: "Argentina / Remoto",
     modalidad: "Remoto",
     jornada: "Jornada completa",
@@ -84,11 +84,6 @@ export default function Home() {
   const [jobOffers, setJobOffers] = useState<JobOffer[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-
-  // Modal de Postulación
-  const [selectedOfferForApply, setSelectedOfferForApply] = useState<JobOffer | null>(null);
-  const [selectedCvIdForApply, setSelectedCvIdForApply] = useState<string>("");
-  const [applyError, setApplyError] = useState<string>("");
 
   // Cargar datos iniciales desde Supabase al iniciar la app
   const loadDataFromSupabase = async () => {
@@ -149,7 +144,7 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         alert(data.message);
-        await loadDataFromSupabase(); // Recargar datos para mostrar las postulaciones nuevas
+        await loadDataFromSupabase();
       } else {
         alert('Error: ' + data.error);
       }
@@ -303,24 +298,24 @@ export default function Home() {
       const mockOffers: JobOffer[] = [
         {
           id: "job-1",
-          title: `${preferences.puestos || "Desarrollador Web"} Frontend`,
-          company: "Tech Solutions Inc.",
-          location: preferences.ubicacion || "Remoto",
-          modality: preferences.modalidad || "Remoto",
+          title: "Atención al Cliente / Ventas",
+          company: "Comercial del Centro",
+          location: preferences.ubicacion || "Santa Fe",
+          modality: preferences.modalidad || "Presencial",
           compatibility: 95,
-          description: `Buscamos profesional con conocimientos en ${preferences.keywords || "React, JavaScript"}. Trabajo dinámico en equipo.`,
-          source: "Portal Laboral Auténtico",
+          description: `Búsqueda orientada a: ${preferences.puestos}. Buena presencia y trato cordial.`,
+          source: "Portal Laboral",
           date: "Hoy",
         },
         {
           id: "job-2",
-          title: `${preferences.puestos || "Desarrollador Web"} Full Stack`,
-          company: "Laboratorio Innovate AI",
-          location: "Buenos Aires, Argentina",
-          modality: "Híbrido",
+          title: "Repositor y Control de Stock",
+          company: "Supermercados Líder",
+          location: "Santa Fe",
+          modality: "Presencial",
           compatibility: 88,
-          description: "Búsqueda activa para integrar proyectos de Inteligencia Artificial. Excelente clima laboral y beneficios.",
-          source: "LinkedIn / Portal Web",
+          description: "Se busca personal para reposición de góndolas y atención en sucursal.",
+          source: "Bolsa de Empleo",
           date: "Ayer",
         },
       ];
@@ -337,471 +332,211 @@ export default function Home() {
   if (jobOffers.length > 0) stepsCompleted++;
 
   return (
-    <main className="app-layout">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">A</div>
-          <div>
-            <h2>Agente Laboral</h2>
-            <span>SUPABASE CLOUD ☁</span>
+    <main className="flex min-h-screen bg-slate-50 text-slate-900 font-sans">
+      {/* MENU LATERAL SLATE / PURPLE */}
+      <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col justify-between p-6 shrink-0 hidden md:flex">
+        <div>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-9 h-9 bg-purple-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-purple-900/50">
+              A
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white leading-none">Agente Laboral</h2>
+              <span className="text-[10px] text-purple-400 font-bold tracking-wider">SUPABASE CLOUD ☁</span>
+            </div>
           </div>
+
+          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Menú Principal</p>
+
+          <nav className="flex flex-col gap-1">
+            {menu.map((item) => (
+              <button
+                key={item.name}
+                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
+                  active === item.name
+                    ? "bg-slate-800 text-purple-400 border-l-2 border-purple-500"
+                    : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                }`}
+                onClick={() => setActive(item.name)}
+              >
+                <span className="text-sm">{item.icon}</span>
+                {item.name}
+              </button>
+            ))}
+          </nav>
         </div>
 
-        <p className="menu-label">MENÚ PRINCIPAL</p>
-
-        <nav className="navigation">
-          {menu.map((item) => (
-            <button
-              key={item.name}
-              className={`nav-item ${active === item.name ? "active" : ""}`}
-              onClick={() => setActive(item.name)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.name}
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-bottom">
-          <div className="status-dot" />
-          <div>
-            <strong>Base de datos activa</strong>
-            <p>{stepsCompleted} de 3 pasos configurados</p>
+        <div className="border-t border-slate-800 pt-4">
+          <div className="flex items-center gap-2 text-xs text-emerald-400 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Base de datos activa
           </div>
+          <p className="text-[11px] text-slate-500 mt-1">{stepsCompleted} de 3 pasos configurados</p>
         </div>
       </aside>
 
-      <section className="main-content">
-        <header className="topbar">
-          <div>
-            <span className="breadcrumb">Agente Laboral /</span>
-            <strong> {active}</strong>
+      {/* CONTENIDO PRINCIPAL */}
+      <section className="flex-1 flex flex-col min-w-0">
+        {/* BARRA SUPERIOR */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+          <div className="text-xs">
+            <span className="text-slate-400">Agente Laboral / </span>
+            <strong className="text-slate-800">{active}</strong>
           </div>
-          <div className="user-avatar">U</div>
+          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+            U
+          </div>
         </header>
 
-        <div className="dashboard">
+        {/* NAVEGACION MOVIL */}
+        <div className="bg-slate-900 p-2 md:hidden flex gap-1 overflow-x-auto">
+          {menu.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => setActive(item.name)}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap ${
+                active === item.name ? "bg-purple-600 text-white" : "text-slate-400"
+              }`}
+            >
+              {item.name}
+            </button>
+          ))}
+        </div>
+
+        {/* PANEL DE VISTAS */}
+        <div className="p-6 md:p-10 max-w-5xl w-full mx-auto space-y-6">
           {active === "Dashboard" && (
             <>
-              <div className="welcome" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <p className="eyebrow">CONECTADO A SUPABASE CLOUD</p>
-                  <h1>Tu próximo trabajo empieza aquí.</h1>
-                  <p className="subtitle">
+                  <span className="text-[10px] font-bold text-purple-600 tracking-wider uppercase">CONECTADO A SUPABASE CLOUD</span>
+                  <h1 className="text-2xl font-bold text-slate-900 mt-1">Tu próximo trabajo empieza aquí.</h1>
+                  <p className="text-xs text-slate-500 mt-1">
                     Tus datos ahora se guardan de forma persistente en la nube.
                   </p>
                 </div>
-                <div>
-                  <button
-                    onClick={handleRunAgent}
-                    disabled={executing}
-                    style={{
-                      backgroundColor: "#7c3aed",
-                      color: "white",
-                      border: "none",
-                      fontWeight: "700",
-                      padding: "12px 20px",
-                      borderRadius: "10px",
-                      cursor: "pointer",
-                      boxShadow: "0 4px 12px rgba(124, 58, 237, 0.3)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px"
-                    }}
-                  >
-                    {executing ? "🤖 Ejecutando IA..." : "🚀 Ejecutar Postulación Autónoma"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="section-heading">
-                <div>
-                  <h2>Resumen general</h2>
-                  <p>El estado actual de tu búsqueda laboral sincronizada.</p>
-                </div>
-                <span className="demo-badge" style={{ backgroundColor: "#dcfce7", color: "#16a34a" }}>Cloud Active</span>
-              </div>
-
-              <div className="stats-grid">
-                <article className="stat-card">
-                  <div className="stat-top">
-                    <span>Ofertas encontradas</span>
-                    <span className="stat-icon purple">⌕</span>
-                  </div>
-                  <strong>{jobOffers.length}</strong>
-                  <p>{jobOffers.length > 0 ? "Ofertas listas para revisar" : "Esperando buscar ofertas"}</p>
-                </article>
-
-                <article className="stat-card">
-                  <div className="stat-top">
-                    <span>Postulaciones</span>
-                    <span className="stat-icon blue">➤</span>
-                  </div>
-                  <strong>{applications.length}</strong>
-                  <p>Guardadas en Supabase</p>
-                </article>
-
-                <article className="stat-card">
-                  <div className="stat-top">
-                    <span>CV analizados</span>
-                    <span className="stat-icon green">▤</span>
-                  </div>
-                  <strong>{analyzedCount}</strong>
-                  <p>De {cvs.length} archivo(s) en Storage</p>
-                </article>
-              </div>
-
-              <div className="content-grid">
-                <section className="panel">
-                  <div className="panel-heading">
-                    <div>
-                      <h2>Prepará tu agente</h2>
-                      <p>Completá estos pasos para comenzar.</p>
-                    </div>
-                    <span className="progress-count">
-                      {stepsCompleted} de 3
-                    </span>
-                  </div>
-
-                  <div className="setup-item">
-                    <div className="step-number">{analyzedCount > 0 ? "✓" : "1"}</div>
-                    <div className="setup-text">
-                      <strong>Cargá y analizá tu CV</strong>
-                      <p>{analyzedCount > 0 ? `${analyzedCount} CV listo(s)` : "Subilo a Supabase Storage"}</p>
-                    </div>
-                    <button className="small-button" onClick={() => setActive("Mis CV")}>
-                      {analyzedCount > 0 ? "Ver" : "Abrir"}
-                    </button>
-                  </div>
-
-                  <div className="setup-item">
-                    <div className="step-number">{prefSaved ? "✓" : "2"}</div>
-                    <div className="setup-text">
-                      <strong>Definí tus preferencias</strong>
-                      <p>{prefSaved ? "Guardadas en la base de datos" : "Indicá puestos y ubicación"}</p>
-                    </div>
-                    <button className="small-button" onClick={() => setActive("Configuración")}>
-                      {prefSaved ? "Editar" : "Abrir"}
-                    </button>
-                  </div>
-
-                  <div className="setup-item">
-                    <div className="step-number">{jobOffers.length > 0 ? "✓" : "3"}</div>
-                    <div className="setup-text">
-                      <strong>Conectá tu búsqueda</strong>
-                      <p>{jobOffers.length > 0 ? `${jobOffers.length} ofertas encontradas` : "Prepará las fuentes de ofertas laborales."}</p>
-                    </div>
-                    <button className="small-button" onClick={() => setActive("Ofertas de empleo")}>
-                      Abrir
-                    </button>
-                  </div>
-                </section>
-
-                <section className="panel activity-panel">
-                  <div className="panel-heading">
-                    <div>
-                      <h2>Actividad reciente</h2>
-                      <p>Historial sincronizado desde Supabase.</p>
-                    </div>
-                  </div>
-                  {applications.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-icon">⌁</div>
-                      <strong>Sin postulaciones registradas</strong>
-                      <p>Tus postulaciones enviadas aparecerán acá y se grabarán en la nube.</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                      {applications.map((app) => (
-                        <div key={app.id} style={{ padding: "10px 14px", backgroundColor: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "13px" }}>
-                          <strong>➤ Postulación a {app.company}</strong>
-                          <p style={{ margin: "2px 0 0 0", color: "#64748b" }}>Puesto: {app.jobTitle} - {app.date}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              </div>
-            </>
-          )}
-
-          {active === "Ofertas de empleo" && (
-            <>
-              <div className="page-intro">
-                <p className="eyebrow">BÚSQUEDA AUTOMÁTICA CON IA</p>
-                <h1>Ofertas de empleo compatibles</h1>
-                <p className="page-description">
-                  El agente busca oportunidades laborales adaptadas a tus preferencias y tu CV.
-                </p>
-              </div>
-
-              <section className="panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Buscar Ofertas</h2>
-                    <p>
-                      Búsqueda en base a tu perfil: <strong>{preferences.puestos || "Sin especificar"}</strong> en <strong>{preferences.ubicacion || "Sin especificar"}</strong>.
-                    </p>
-                  </div>
-                  <button
-                    onClick={searchJobs}
-                    disabled={isSearching}
-                    style={{
-                      backgroundColor: "#7c3aed",
-                      color: "white",
-                      border: "none",
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      padding: "10px 20px",
-                      borderRadius: "8px",
-                      cursor: "pointer"
-                    }}
-                  >
-                    {isSearching ? "Buscando..." : "⌕ Buscar Oportunidades"}
-                  </button>
-                </div>
-
-                {jobOffers.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-icon">⌕</div>
-                    <strong>No hay ofertas cargadas aún</strong>
-                    <p>Haz clic en "Buscar Oportunidades" para que el agente escanee el mercado laboral.</p>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    {jobOffers.map((offer) => (
-                      <div
-                        key={offer.id}
-                        style={{
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "12px",
-                          padding: "20px",
-                          backgroundColor: "white"
-                        }}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-                          <div>
-                            <h3 style={{ fontSize: "16px", fontWeight: "700", margin: "0 0 4px 0", color: "#0f172a" }}>
-                              {offer.title}
-                            </h3>
-                            <p style={{ fontSize: "13px", color: "#64748b", margin: 0 }}>
-                              <strong>{offer.company}</strong> - {offer.location} ({offer.modality})
-                            </p>
-                          </div>
-                          <span
-                            style={{
-                              backgroundColor: offer.compatibility >= 90 ? "#dcfce7" : "#e0f2fe",
-                              color: offer.compatibility >= 90 ? "#16a34a" : "#0284c7",
-                              fontWeight: "700",
-                              fontSize: "12px",
-                              padding: "4px 10px",
-                              borderRadius: "20px"
-                            }}
-                          >
-                            {offer.compatibility}% Compatible
-                          </span>
-                        </div>
-                        <p style={{ fontSize: "13px", color: "#334155", margin: "12px 0" }}>
-                          {offer.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </section>
-            </>
-          )}
-
-          {active === "Mis CV" && (
-            <>
-              <div className="page-intro">
-                <p className="eyebrow">ALMACENAMIENTO EN SUPABASE STORAGE</p>
-                <h1>Mis currículums y perfil IA</h1>
-                <p className="page-description">
-                  Tus archivos se suben de forma segura a la nube y se procesan.
-                </p>
-              </div>
-
-              <section className="panel cv-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Cargar currículum</h2>
-                    <p>Formatos admitidos: PDF, DOC y DOCX. Máximo 10 MB.</p>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    border: "2px dashed #7c3aed",
-                    borderRadius: "12px",
-                    padding: "32px 20px",
-                    textAlign: "center",
-                    backgroundColor: "#f5f3ff",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => inputRef.current?.click()}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => {
-                    event.preventDefault();
-                    handleFiles(event.dataTransfer.files);
-                  }}
+                <button
+                  onClick={handleRunAgent}
+                  disabled={executing}
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-purple-200 disabled:opacity-50"
                 >
-                  <div style={{ fontSize: "32px", color: "#7c3aed", marginBottom: "8px" }}>↑</div>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", margin: "0 0 4px 0", color: "#0f172a" }}>
-                    Seleccioná tu CV para subir a la nube
-                  </h3>
-                  <p style={{ fontSize: "13px", color: "#64748b", margin: "0 0 16px 0" }}>
-                    Elegí un archivo desde tu computadora o arrastralo acá.
-                  </p>
+                  {executing ? "🤖 Ejecutando IA..." : "🚀 Ejecutar Postulación Autónoma"}
+                </button>
+              </div>
 
-                  <button
-                    type="button"
-                    style={{
-                      backgroundColor: "#7c3aed",
-                      color: "white",
-                      border: "none",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      padding: "10px 24px",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    📁 Seleccionar Archivo
-                  </button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <article className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <span className="text-xs text-slate-500 font-medium">Ofertas encontradas</span>
+                  <strong className="block text-2xl font-bold text-slate-900 mt-2">{jobOffers.length}</strong>
+                  <p className="text-[11px] text-slate-400 mt-1">{jobOffers.length > 0 ? "Ofertas listas para revisar" : "Esperando buscar ofertas"}</p>
+                </article>
 
-                  <input
-                    ref={inputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    multiple
-                    style={{ display: "none" }}
-                    onChange={(event) => handleFiles(event.target.files)}
-                  />
-                </div>
+                <article className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <span className="text-xs text-slate-500 font-medium">Postulaciones</span>
+                  <strong className="block text-2xl font-bold text-slate-900 mt-2">{applications.length}</strong>
+                  <p className="text-[11px] text-slate-400 mt-1">Guardadas en Supabase</p>
+                </article>
 
-                {message && <p className="success-message">{message}</p>}
-                {error && <p className="error-message">{error}</p>}
-              </section>
-
-              <section className="panel cv-list-panel">
-                <div className="panel-heading">
-                  <div>
-                    <h2>Archivos en Supabase y Análisis IA</h2>
-                    <p>{cvs.length} archivo(s) almacenados</p>
-                  </div>
-                </div>
-
-                {cvs.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-icon">▤</div>
-                    <strong>No hay CVs en la base de datos</strong>
-                    <p>Sube tu primer archivo para comenzar.</p>
-                  </div>
-                ) : (
-                  <div className="cv-list">
-                    {cvs.map((cv) => (
-                      <div key={cv.id} style={{ display: "flex", flexDirection: "column", width: "100%", gap: "10px" }}>
-                        <article className="cv-file-row">
-                          <div className="file-icon">CV</div>
-                          <div className="file-info">
-                            <strong>{cv.file_name}</strong>
-                            <p>{cv.analyzed ? "Analizado y guardado ✓" : "Pendiente de análisis IA"}</p>
-                          </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            {!cv.analyzed ? (
-                              <button
-                                className="small-button"
-                                style={{ backgroundColor: "#7c3aed", color: "white" }}
-                                onClick={() => analyzeCV(cv.id)}
-                              >
-                                Analizar con IA
-                              </button>
-                            ) : (
-                              <button
-                                className="small-button"
-                                onClick={() => setSelectedCvForAnalysis(selectedCvForAnalysis === cv.id ? null : cv.id)}
-                              >
-                                {selectedCvForAnalysis === cv.id ? "Ocultar datos" : "Ver datos extraídos"}
-                              </button>
-                            )}
-                            <button className="remove-button" onClick={() => removeCV(cv.id)}>
-                              Quitar
-                            </button>
-                          </div>
-                        </article>
-
-                        {selectedCvForAnalysis === cv.id && cv.extractedData && (
-                          <div style={{ backgroundColor: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "16px" }}>
-                            <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#7c3aed", marginBottom: "8px" }}>
-                              ✦ Información extraída y persistida en Supabase
-                            </h3>
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", fontSize: "13px" }}>
-                              <div>
-                                <strong>Nombre / Perfil:</strong>
-                                <p style={{ margin: "2px 0 0 0", color: "#475569" }}>{cv.extractedData.nombre}</p>
-                              </div>
-                              <div>
-                                <strong>Puesto Ideal Estimado:</strong>
-                                <p style={{ margin: "2px 0 0 0", color: "#475569" }}>{cv.extractedData.puesto}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </section>
+                <article className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                  <span className="text-xs text-slate-500 font-medium">CV analizados</span>
+                  <strong className="block text-2xl font-bold text-slate-900 mt-2">{analyzedCount}</strong>
+                  <p className="text-[11px] text-slate-400 mt-1">De {cvs.length} archivo(s) en Storage</p>
+                </article>
+              </div>
             </>
           )}
 
           {active === "Configuración" && (
-            <div className="panel">
-              <h2>Preferencias Laborales</h2>
-              <p>Configura los datos que usará el agente para el matching automático.</p>
-              <form onSubmit={handleSavePreferences} style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "16px" }}>
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Preferencias Laborales</h2>
+                <p className="text-xs text-slate-500 mt-1">Configura los datos que usará el agente para el matching automático.</p>
+              </div>
+
+              <form onSubmit={handleSavePreferences} className="space-y-4">
                 <div>
-                  <label style={{ fontSize: "12px", fontWeight: "bold" }}>Puestos de interés:</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Puestos de interés (puedes poner varios separados por comas):
+                  </label>
                   <input
                     type="text"
                     value={preferences.puestos}
                     onChange={(e) => setPreferences({ ...preferences, puestos: e.target.value })}
-                    style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "6px" }}
+                    placeholder="Ej: Atención al cliente, Repositor, Ventas, Desarrollador Web"
+                    className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: "12px", fontWeight: "bold" }}>Palabras Clave (Keywords):</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    Palabras Clave (Keywords):
+                  </label>
                   <input
                     type="text"
                     value={preferences.keywords}
                     onChange={(e) => setPreferences({ ...preferences, keywords: e.target.value })}
-                    style={{ width: "100%", padding: "8px", border: "1px solid #cbd5e1", borderRadius: "6px" }}
+                    className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                 </div>
-                <button type="submit" style={{ backgroundColor: "#7c3aed", color: "white", padding: "10px", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" }}>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition shadow-md shadow-purple-100"
+                >
                   Guardar Preferencias
                 </button>
-                {prefMessage && <p style={{ color: "#16a34a", fontSize: "13px" }}>{prefMessage}</p>}
+
+                {prefMessage && (
+                  <p className="text-xs text-emerald-600 font-semibold text-center mt-2">{prefMessage}</p>
+                )}
               </form>
             </div>
           )}
 
-          {active === "Postulaciones" && (
-            <div className="panel">
-              <h2>Historial de Postulaciones</h2>
-              <p>Registro completo de postulaciones enviadas por el agente a Supabase.</p>
-              {applications.length === 0 ? (
-                <p style={{ marginTop: "12px", color: "#64748b" }}>No hay postulaciones registradas todavía.</p>
+          {active === "Ofertas de empleo" && (
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-slate-900">Ofertas de Empleo</h2>
+                <button
+                  onClick={searchJobs}
+                  disabled={isSearching}
+                  className="px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-xl hover:bg-purple-700 transition"
+                >
+                  {isSearching ? "Buscando..." : "Buscar Oportunidades"}
+                </button>
+              </div>
+              {jobOffers.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">No hay ofertas cargadas aún.</p>
               ) : (
-                <ul style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {applications.map((app) => (
-                    <li key={app.id} style={{ padding: "10px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "6px" }}>
-                      <strong>{app.jobTitle}</strong> en {app.company} - <span style={{ color: "#16a34a" }}>{app.status}</span>
-                    </li>
+                <div className="space-y-3">
+                  {jobOffers.map((o) => (
+                    <div key={o.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1">
+                      <p className="font-bold text-slate-800">{o.title} - {o.company}</p>
+                      <p className="text-slate-500">{o.description}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
+            </div>
+          )}
+
+          {active === "Mis CV" && (
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h2 className="text-xl font-bold text-slate-900">Gestión de CVs</h2>
+              <div
+                onClick={() => inputRef.current?.click()}
+                className="p-8 bg-purple-50 border border-dashed border-purple-300 rounded-2xl text-center cursor-pointer"
+              >
+                <p className="text-xs font-bold text-purple-700">Subir CV a Supabase Storage</p>
+                <input ref={inputRef} type="file" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+              </div>
+            </div>
+          )}
+
+          {active === "Postulaciones" && (
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+              <h2 className="text-xl font-bold text-slate-900">Historial de Postulaciones</h2>
+              <p className="text-xs text-slate-500">Postulaciones registradas en la nube.</p>
             </div>
           )}
         </div>
